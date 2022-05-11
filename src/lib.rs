@@ -56,17 +56,36 @@ impl DFA {
         if s.is_empty() {
             self.final_states.contains(&0)
         } else {
+            println!("Possible final states: {:?}", self.final_states);
+            // Start at the initial state.
             let mut current_state = (&0, self.get_state(&0));
+            let mut transition_count = 1;
 
+            // Loop through the letters of the supplied string.
             for c in s.chars() {
                 let next_state = current_state.1.transition_for(&c);
 
+                // Check if the next state exists.
                 match next_state {
-                    Some(next_state) => current_state = (next_state, self.get_state(next_state)),
+                    // If it does, set it as the current state.
+                    Some(next_state) => {
+                        println!("Transition {}: {} {} {}", transition_count, current_state.0, c, next_state);
+                        transition_count += 1;
+                        current_state = (next_state, self.get_state(next_state))
+                    },
+                    // Otherwise, end the check.
                     None => return false,
                 }
             }
 
+            println!("{} {} a final state.", current_state.0, 
+                if self.final_states.contains(current_state.0) {
+                    "is"
+                } else {
+                    "is not"
+                }
+            );
+            
             self.final_states.contains(current_state.0)
         }
     }
