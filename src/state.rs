@@ -13,8 +13,8 @@ impl State {
     ///
     /// No validation is made that `new_state` exists until after
     /// all of the states have been added to the DFA.
-    pub fn add_transition(&mut self, w: char, new_state: i32) {
-        self.transitions.insert(w, new_state);
+    pub fn add_transition(&mut self, w: char, new_state: i32) -> Option<i32> {
+        self.transitions.insert(w, new_state)
     }
 
     /// Return the transition from this state for the specified input.

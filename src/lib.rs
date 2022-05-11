@@ -69,23 +69,28 @@ impl DFA {
                 match next_state {
                     // If it does, set it as the current state.
                     Some(next_state) => {
-                        println!("Transition {}: {} {} {}", transition_count, current_state.0, c, next_state);
+                        println!(
+                            "Transition {}: {} {} {}",
+                            transition_count, current_state.0, c, next_state
+                        );
                         transition_count += 1;
                         current_state = (next_state, self.get_state(next_state))
-                    },
+                    }
                     // Otherwise, end the check.
                     None => return false,
                 }
             }
 
-            println!("{} {} a final state.", current_state.0, 
+            println!(
+                "{} {} a final state.",
+                current_state.0,
                 if self.final_states.contains(current_state.0) {
                     "is"
                 } else {
                     "is not"
                 }
             );
-            
+
             self.final_states.contains(current_state.0)
         }
     }
@@ -117,6 +122,8 @@ pub struct DFABuilder {
 pub enum DFABuilderError {
     /// Represents a malformed line in the DFA file.
     MalformedLine(&'static str),
+    /// Represents that a transition added already had a transition.
+    TransitionAlreadyExists,
     /// Represents when the DFA encounters a non-integral final state.
     NonIntegralFinalState,
     /// Represents the DFA data was empty.
@@ -182,7 +189,9 @@ impl DFABuilder {
                 .or_insert_with(State::default);
 
             // Add the transition to the state.
-            state.add_transition(w, to_state);
+            if state.add_transition(w, to_state).is_some() {
+                return Err(DFABuilderError::TransitionAlreadyExists);
+            }
         }
 
         Ok(builder)
@@ -206,7 +215,7 @@ impl DFABuilder {
         self.states.get(&0)?;
 
         // Ensure there's at least one final state.
-        if self.final_states.len() < 1 {
+        if self.final_states.is_empty() {
             return None;
         }
 

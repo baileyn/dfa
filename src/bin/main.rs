@@ -1,4 +1,5 @@
 extern crate dfa;
+extern crate terminal;
 
 use std::io;
 use std::io::prelude::*;
@@ -57,12 +58,13 @@ fn request_file() -> File {
 fn main() {
     let file = request_file();
     
-    if let Ok(dfa_builder) = DFABuilder::from(io::BufReader::new(file)) {
-        if let Some(dfa) = dfa_builder.build() {
-            loop {
-                if std::process::Command::new("cls").status().unwrap().success() {
+    match DFABuilder::from(io::BufReader::new(file)) {
+        Ok(dfa_builder) => {
+            if let Some(dfa) = dfa_builder.build() {
+                loop {
                     // Request input from the user for the string to test.
                     let line: String = request_input("Enter string ['quit' to exit]: ").unwrap();
+                    terminal::clear();
                     
                     // If the user specified to quit, exit the program.
                     if line == "quit" {
@@ -75,14 +77,21 @@ fn main() {
                     } else {
                         println!("That line isn't valid with this DFA.");
                     }
-                } else {
-                    println!("Unable to clear screen.");
                 }
+            } else {
+                eprintln!("Unable to build DFA.");
             }
-        } else {
-            eprintln!("The specified file was successfully parsed, but doesn't represent a valid DFA.");
+        },
+        Err(e) => {
+            // If an error occured, determine why and print out a useful message.
+            match e {
+                DFABuilderError::MalformedLine(e) => eprintln!("{}", e),
+                DFABuilderError::TransitionAlreadyExists => eprintln!("Multiple state transitions for the same letter was detected."),
+                DFABuilderError::NonIntegralFinalState => eprintln!("A final state was detected that didn't have an integral value."),
+                DFABuilderError::EmptyStream => eprintln!("No data was found in the specified file."),
+                DFABuilderError::ExpectedChar => eprintln!("Expected a single character, but received more."),
+                DFABuilderError::ExptectedInt => eprintln!("Expected an integer, but got different input.")
+            }
         }
-    } else {
-        eprintln!("There was an error in the DFA.");
-    }
+    } 
 }
