@@ -60,18 +60,24 @@ fn main() {
     if let Ok(dfa_builder) = DFABuilder::from(io::BufReader::new(file)) {
         if let Some(dfa) = dfa_builder.build() {
             loop {
-                let line: String = request_input("Enter string ['quit' to exit]: ").unwrap();
-                
-                if line == "quit" {
-                    break;
-                }
+                if std::process::Command::new("cls").status().unwrap().success() {
+                    // Request input from the user for the string to test.
+                    let line: String = request_input("Enter string ['quit' to exit]: ").unwrap();
+                    
+                    // If the user specified to quit, exit the program.
+                    if line == "quit" {
+                        break;
+                    }
 
-                if dfa.is_valid_string(&line) {
-                    println!("That line is valid with this DFA!");
+                    // Determine whether or not the supplied line is valid for the DFA.
+                    if dfa.is_valid_string(&line) {
+                        println!("That line is valid with this DFA!");
+                    } else {
+                        println!("That line isn't valid with this DFA.");
+                    }
                 } else {
-                    println!("That line isn't valid with this DFA.");
+                    println!("Unable to clear screen.");
                 }
-                println!();
             }
         } else {
             eprintln!("The specified file was successfully parsed, but doesn't represent a valid DFA.");
