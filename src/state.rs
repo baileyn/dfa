@@ -1,12 +1,12 @@
 //! A module for using States in a Deterministic Finite Automata (DFA).
-//! 
+//!
 //! # Example
 //! ```
 //! # use dfa::state::State;
 //! let mut state = State::new();
 //! state.add_transition('a', 1);
 //! state.add_transition('b', 2);
-//! 
+//!
 //! assert_eq!(state.num_transitions(), 2);
 //! ```
 
@@ -22,13 +22,11 @@ pub struct State {
 impl State {
     /// Construct a new state with no initial transitions.
     pub fn new() -> Self {
-        Self {
-            transitions: HashMap::new(),
-        }
+        Self { transitions: HashMap::new() }
     }
 
     /// Add the specified transition to this state.
-    /// 
+    ///
     /// No validation is made that `new_state` exists until after
     /// all of the states have been added to the DFA.
     pub fn add_transition(&mut self, w: char, new_state: i32) {
