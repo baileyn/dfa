@@ -95,7 +95,7 @@ impl DFA {
         // We can unwrap here safely because it's ensured in
         // `DFABuilder#build` that all states referenced in
         // the transitions exist.
-        self.states.get(state_id).unwrap()
+        &self.states[state_id]
     }
 }
 
@@ -144,7 +144,7 @@ impl DFABuilder {
             .collect();
 
         // If the content we're reading from is empty, return an error.
-        if lines.len() == 0 {
+        if lines.is_empty() {
             return Err(DFABuilderError::EmptyStream);
         }
 
@@ -169,7 +169,7 @@ impl DFABuilder {
         for line in lines {
             // Attempt to parse the data in the line to (from_state, w, to_state),
             // if this was not possible, error will be returned (because of ? syntax).
-            let (from_state, w, to_state) = parse_line(&line)?;
+            let (from_state, w, to_state) = parse_line(line)?;
 
             // We can just insert the character here because by the definition
             // of a set, it cannot have duplicates.
@@ -203,9 +203,7 @@ impl DFABuilder {
     /// Attempt to build the `DFA` specified in this `DFABuilder`.
     pub fn build(self) -> Option<DFA> {
         // Ensure there's an initial state.
-        if self.states.get(&0).is_none() {
-            return None;
-        }
+        self.states.get(&0)?;
 
         // Ensure there's at least one final state.
         if self.final_states.len() < 1 {
@@ -213,24 +211,13 @@ impl DFABuilder {
         }
 
         // Ensure all states have a branch for each item in the alphabet.
-        for (_state_id, state) in &self.states {
+        for state in self.states.values() {
             for w in &self.alphabet {
                 // Get the transition for the current item in the alphabet.
-                let transition = state.transition_for(w);
-
-                // If the transition doesn't exist, we can't successfully return a DFA.
-                if transition.is_none() {
-                    return None;
-                }
-
-                // At this point, there's guaranteed to be a transition for the item,
-                // so we can safely unwrap it.
-                let transition = transition.unwrap();
+                let transition = state.transition_for(w)?;
 
                 // Ensure that the state being transitioned to actually exists.
-                if self.states.get(transition).is_none() {
-                    return None;
-                }
+                self.states.get(transition)?;
             }
         }
 

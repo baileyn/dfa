@@ -19,7 +19,7 @@ impl State {
 
     /// Return the transition from this state for the specified input.
     pub fn transition_for(&self, w: &char) -> Option<&i32> {
-        self.transitions.get(&w)
+        self.transitions.get(w)
     }
 
     /// Return the number of transitions from this state.

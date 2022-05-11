@@ -23,9 +23,9 @@ pub fn request_input<T>(msg: &str) -> Option<T>
     let mut input = String::new();
 
     print!("{}", msg);
-    io::stdout().flush().ok().expect("Unable to flush output stream.");
+    io::stdout().flush().expect("Unable to flush output stream.");
     
-    if let Ok(_) = io::stdin().read_line(&mut input) {
+    if io::stdin().read_line(&mut input).is_ok() {
         if let Ok(data) = T::from_str(input.trim()) {
             Some(data)
         } else {
@@ -49,7 +49,7 @@ fn request_file() -> File {
             return file;
         } else {
             // Let the user know that file didn't exist and keep asking.
-            writeln!(io::stderr(), "The specified file didn't exist!").unwrap();
+            eprintln!("The specified file didn't exist!");
         }
     }
 }
@@ -71,11 +71,12 @@ fn main() {
                 } else {
                     println!("That line isn't valid with this DFA.");
                 }
+                println!();
             }
         } else {
-            println!("The specified file was successfully parsed, but doesn't represent a valid DFA.");
+            eprintln!("The specified file was successfully parsed, but doesn't represent a valid DFA.");
         }
     } else {
-        println!("There was an error in the DFA.");
+        eprintln!("There was an error in the DFA.");
     }
 }
