@@ -17,5 +17,9 @@ fn main() {
         "#,
     ));
 
-    assert_eq!(true, builder.is_ok());
+    println!("{:#?}", builder);
+
+    let dfa = builder.unwrap().build().unwrap();
+    println!("Is valid 'abab'? {}", dfa.is_valid_string("abab"));
+    println!("Is valid 'ababa'? {}", dfa.is_valid_string("ababa"));
 }
